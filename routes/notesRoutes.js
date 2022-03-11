@@ -1,30 +1,36 @@
 const router = require('express').Router();
 const fs = require(`fs`);
+const { readAndAppend, readFromFile } = require('../helpers/fsUtils');
 const path = require(`path`);
 
-router.get("/api/notes", function(req, res) {
-    res.sendFile(path.join(__dirname, "db.json"));
-});
+router.get('/', (req, res) =>
+  readFromFile('./db/db.json').then((data) => res.json(JSON.parse(data)))
+);
 
-router.post("/api/notes", function(req, res) {
-    fs.readFile(path.join(__dirname, "db.json"), "utf8", function(error, response) {
-        if (error) {
-            console.log(error);
-        }
-        const newNote = req.body;
-        const notes = JSON.parse(response);
-        const noteId = notes.length + 1;
-        const note = {
-            id: noteId,
-            title: newNote.title,
-            text: newNote.text
-        };
-        newNote.push(note);
-        res.json(note);
-        fs.writeFile(path.join(__dirname, "db.json"), JSON.stringify(notes, null, 2), function(err) {
-            if (err) throw err;
-        });
-    });
-});
+router.post('/', (req, res) => {
+    // Destructuring assignment for the items in req.body
+    console.log(req.body);
+    const { title, text } = req.body;
+  
+    // If all the required properties are present
+    if (title && text ) {
+      // Variable for the object we will save
+      const newNote = {
+        title,
+        text,
+      };
+  
+      readAndAppend(newNote, './db/db.json');
+  
+      const response = {
+        status: 'success',
+        body: newNote,
+      };
+  
+      res.json(response);
+    } else {
+      res.json('Error in saving note');
+    }
+  });
 
 module.exports = router;
