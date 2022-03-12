@@ -27,6 +27,6 @@ app.get('/notes', (req, res) =>
 app.set( 'port', ( process.env.PORT || 5000 ));
 
 
-app.listen(PORT, () =>
-  console.log(`App listening at http://localhost:${PORT} 🚀`)
-);
+app.listen( app.get( 'port' ), function() {
+  console.log( 'Node server is running on port ' + app.get( 'port' ));
+  });
